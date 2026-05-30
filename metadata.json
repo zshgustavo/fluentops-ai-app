@@ -1,0 +1,6 @@
+{
+  "name": "Business English Coach",
+  "description": "A minimalist professional English tutor focusing on business vocabulary, communication templates, interactive simulated video calls, and AI-driven feedback.",
+  "requestFramePermissions": ["microphone"],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}
