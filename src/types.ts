@@ -110,6 +110,12 @@ export interface WritingFeedback {
   }[];
   suggestedRewrite: string;
   coachingCommentary: string;
+  commonGrammarErrors?: {
+    errorType: string;
+    description: string;
+    example: string;
+    correction: string;
+  }[];
 }
 
 export interface OralFeedback {

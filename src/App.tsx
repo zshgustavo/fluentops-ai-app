@@ -29,13 +29,15 @@ import {
   Volume2,
   Sun,
   Moon,
-  LogOut
+  LogOut,
+  Maximize,
+  Minimize
 } from "lucide-react";
 
 export default function App() {
   // Theme state: 'light' ou 'dark' (para estudo noturno em baixa luminosidade)
   const [theme, setTheme] = useState<"light" | "dark">(() => {
-    return (localStorage.getItem("eloquent_theme") as "light" | "dark") || "light";
+    return (localStorage.getItem("eloquent_theme") as "light" | "dark") || "dark";
   });
 
   useEffect(() => {
@@ -49,6 +51,7 @@ export default function App() {
   });
 
   const [activeTab, setActiveTab] = useState("dashboard");
+  const [isImmersiveMode, setIsImmersiveMode] = useState(false);
   const [offlineMode, setOfflineMode] = useState(false);
   const [isServerHealthy, setIsServerHealthy] = useState(true);
 
@@ -77,13 +80,17 @@ export default function App() {
     }
   };
 
-  const handleGoogleLogout = async () => {
+  const handleAppLogout = async () => {
     try {
-      await logout();
-      setNeedsAuth(true);
+      if (!needsAuth) {
+        await logout();
+        setNeedsAuth(true);
+      }
     } catch (err) {
       console.error('Logout failed:', err);
     }
+    localStorage.removeItem("eloquent_profile");
+    setProfile(null);
   };
 
   const handleCreateMissedTask = async (taskName: string) => {
@@ -228,11 +235,52 @@ export default function App() {
   const [speakingText, setSpeakingText] = useState("");
   const [targetSpeakPhrase, setTargetSpeakPhrase] = useState("");
   const [isRecording, setIsRecording] = useState(false);
+  const [recordingTimeLeft, setRecordingTimeLeft] = useState<number | null>(null);
+  const recordingTimerRef = useRef<number | null>(null);
   const [isAnalyzingPronunciation, setIsAnalyzingPronunciation] = useState(false);
   const [pronunciationFeedback, setPronunciationFeedback] = useState<OralFeedback | null>(null);
   
   // Audio recognition refs
   const recognitionRef = useRef<any>(null);
+
+  useEffect(() => {
+    if (isRecording) {
+      setRecordingTimeLeft(60);
+      recordingTimerRef.current = window.setInterval(() => {
+        setRecordingTimeLeft((prev) => {
+          if (prev !== null && prev <= 1) {
+            return 0;
+          }
+          return prev !== null ? prev - 1 : null;
+        });
+      }, 1000);
+    } else {
+      if (recordingTimerRef.current !== null) {
+        window.clearInterval(recordingTimerRef.current);
+        recordingTimerRef.current = null;
+      }
+      setRecordingTimeLeft(null);
+    }
+    return () => {
+      if (recordingTimerRef.current !== null) {
+        window.clearInterval(recordingTimerRef.current);
+        recordingTimerRef.current = null;
+      }
+    };
+  }, [isRecording]);
+
+  useEffect(() => {
+    if (recordingTimeLeft === 0 && isRecording) {
+      setIsRecording(false);
+      if (recognitionRef.current) {
+        try {
+          recognitionRef.current.stop();
+        } catch (e) {
+          // ignore
+        }
+      }
+    }
+  }, [recordingTimeLeft, isRecording]);
 
   // Text-To-Speech Pronunciation Voice Synthesizer
   const handleHearPremiumPronunciation = (phraseToSpeak: string) => {
@@ -671,7 +719,7 @@ export default function App() {
   if (!profile) {
     return <Onboarding onComplete={(newProfile) => {
       setProfile(newProfile);
-      setTheme((localStorage.getItem("eloquent_theme") as "light" | "dark") || "light");
+      setTheme((localStorage.getItem("eloquent_theme") as "light" | "dark") || "dark");
     }} />;
   }
 
@@ -679,6 +727,7 @@ export default function App() {
     <div className={`flex h-screen w-full overflow-hidden font-sans transition-colors duration-300 ${theme === 'dark' ? "bg-[#0f111a] text-[#f1f5f9]" : "bg-[#fcfcfc] text-neutral-900"}`}>
       
       {/* minimalist navigation sidebar - eloquent style focus */}
+      {!isImmersiveMode && (
       <aside className={`w-64 h-full flex flex-col p-6 shrink-0 shadow-xs border-r transition-all duration-300 ${theme === 'dark' ? "bg-[#161a24] border-[#242936]" : "bg-white border-neutral-200"}`} id="nav-sidebar">
         
         {/* elegant logo branding component */}
@@ -811,28 +860,41 @@ export default function App() {
                 {profile.industry === 'Technology' ? 'Tecnologia' : profile.industry === 'Finance' ? 'Finanças' : 'Gestão Geral'}
               </p>
             </div>
-            {!needsAuth && (
-              <button
-                onClick={handleGoogleLogout}
-                className={`p-2 rounded-lg transition-colors cursor-pointer ${theme === 'dark' ? "hover:bg-[#1e2332] text-neutral-500 hover:text-white" : "hover:bg-neutral-100 text-neutral-400 hover:text-neutral-900"}`}
-                title="Desconectar do Google"
-              >
-                <LogOut className="w-4 h-4" />
-              </button>
-            )}
+            <button
+              onClick={handleAppLogout}
+              className={`p-2 rounded-lg transition-colors cursor-pointer shrink-0 ${theme === 'dark' ? "hover:bg-[#1e2332] text-neutral-500 hover:text-white" : "hover:bg-neutral-100 text-neutral-400 hover:text-neutral-900"}`}
+              title="Sair do aplicativo"
+            >
+              <LogOut className="w-4 h-4" />
+            </button>
           </div>
         </div>
       </aside>
+      )}
 
       {/* Main viewport area */}
       <main className="flex-1 flex flex-col h-full overflow-hidden">
         
         {/* minimalist clean header panel */}
         <header className={`h-16 border-b px-8 flex items-center justify-between shrink-0 transition-colors duration-300 ${theme === 'dark' ? "bg-[#161a25] border-[#242936]" : "bg-white border-neutral-200"}`}>
-          <div>
+          <div className="flex items-center gap-4">
             <h2 className="text-[11px] font-bold text-neutral-400 uppercase tracking-widest animate-fade-in">
               Espaço Executivo / {activeTab === "dashboard" ? "Visualização Geral" : activeTab === "lessons" ? "Planejamento Lírico" : activeTab === "calls" ? "Videochamada Simulada" : "Redação Analítica"}
             </h2>
+            {(activeTab === "lessons" || activeTab === "calls") && (
+              <button
+                onClick={() => setIsImmersiveMode(!isImmersiveMode)}
+                className={`flex items-center gap-1.5 px-2.5 py-1.5 rounded-md text-[10px] font-bold uppercase tracking-wider transition-colors border ${
+                  isImmersiveMode 
+                    ? "bg-blue-600/10 border-blue-500/30 text-blue-500 hover:bg-blue-600/20" 
+                    : (theme === "dark" ? "bg-[#242936] border-transparent text-neutral-300 hover:bg-[#2a3040]" : "bg-neutral-100 border-transparent text-neutral-600 hover:bg-neutral-200")
+                }`}
+                title="Alternar Modo Imersivo"
+              >
+                {isImmersiveMode ? <Minimize className="w-3.5 h-3.5" /> : <Maximize className="w-3.5 h-3.5" />}
+                {isImmersiveMode ? "Sair do Modo Imersivo" : "Modo Imersivo"}
+              </button>
+            )}
           </div>
 
           <div className="flex items-center gap-6">
@@ -871,7 +933,7 @@ export default function App() {
 
           {/* TAB 2: DAILY LESSON PLANS (AI OR CACHED) */}
           {activeTab === "lessons" && (
-            <div className="space-y-8 max-w-4xl mx-auto my-1 animate-fade-in text-sans">
+            <div className={`${isImmersiveMode ? "w-full max-w-6xl px-8" : "max-w-4xl"} mx-auto my-1 space-y-8 animate-fade-in text-sans transition-all duration-500`}>
               
               {/* Header card info */}
               <div className={`flex flex-col md:flex-row justify-between items-start md:items-center gap-4 p-6 rounded-2xl border transition-colors ${theme === 'dark' ? "bg-[#161a24] border-[#242936]" : "bg-white border-neutral-100 shadow-xs"}`}>
@@ -1071,7 +1133,7 @@ export default function App() {
                     </div>
 
                     <div className="space-y-4 mt-6">
-                      <div className="flex justify-center items-center py-4">
+                      <div className="flex flex-col items-center justify-center py-4 space-y-3">
                         <button
                           onClick={startRecordingToggle}
                           className={`w-14 h-14 rounded-full flex items-center justify-center transition-all cursor-pointer ${
@@ -1083,6 +1145,16 @@ export default function App() {
                         >
                           {isRecording ? <MicOff className="w-6 h-6" /> : <Mic className="w-6 h-6" />}
                         </button>
+
+                        {isRecording && recordingTimeLeft !== null && (
+                          <div className={`px-3 py-1 rounded-full text-xs font-mono font-bold transition-colors ${
+                            recordingTimeLeft <= 10 
+                              ? "bg-red-100 text-red-600 dark:bg-red-900/30 dark:text-red-400 animate-pulse" 
+                              : "bg-blue-50 text-blue-600 dark:bg-blue-900/30 dark:text-blue-400"
+                          }`}>
+                            00:{recordingTimeLeft.toString().padStart(2, '0')}
+                          </div>
+                        )}
                       </div>
 
                       <p className="text-[10px] text-center text-neutral-400 leading-normal">
@@ -1245,7 +1317,7 @@ export default function App() {
 
           {/* TAB 3: SIMULATED VIDEO CALL INTERACTIVE ROOM */}
           {activeTab === "calls" && (
-            <div className="max-w-5xl mx-auto my-1 space-y-8 animate-fade-in text-sans">
+            <div className={`${isImmersiveMode ? "w-full max-w-7xl px-8" : "max-w-5xl"} mx-auto my-1 space-y-8 animate-fade-in text-sans transition-all duration-500`}>
               
               {!callActive ? (
                 <div className={`p-6 rounded-2xl border transition-all ${theme === 'dark' ? "bg-[#161a24] border-[#242936]" : "bg-white border-neutral-100 shadow-xs"} space-y-6`}>
@@ -1660,6 +1732,32 @@ export default function App() {
                         }`}>
                           <strong>Avaliação do Professor de Negócios:</strong> {writingFeedback.coachingCommentary}
                         </div>
+
+                        {writingFeedback.commonGrammarErrors && writingFeedback.commonGrammarErrors.length > 0 && (
+                          <div className="space-y-3 mt-6">
+                            <h4 className="text-xs font-bold uppercase text-neutral-400 tracking-wider flex items-center gap-2">
+                              Dicas Gramaticais do Rascunho
+                            </h4>
+                            <div className="space-y-2">
+                              {writingFeedback.commonGrammarErrors.map((err, i) => (
+                                <div key={i} className={`p-3.5 border rounded-xl space-y-2 text-xs ${
+                                  theme === 'dark' ? "bg-red-950/10 border-red-900/30" : "bg-red-50/50 border-red-100"
+                                }`}>
+                                  <h5 className={`font-bold ${theme === 'dark' ? "text-red-400" : "text-red-700"}`}>
+                                    {err.errorType}
+                                  </h5>
+                                  <p className={`font-sans leading-relaxed ${theme === 'dark' ? "text-neutral-300" : "text-neutral-600"}`}>
+                                    {err.description}
+                                  </p>
+                                  <div className={`flex flex-col gap-1 mt-2 p-2 rounded-lg ${theme === 'dark' ? 'bg-black/20' : 'bg-white/50'}`}>
+                                    <p className="text-neutral-500 font-mono line-through font-semibold">"{err.example}"</p>
+                                    <p className="text-emerald-600 dark:text-emerald-500 font-mono font-bold">→ "{err.correction}"</p>
+                                  </div>
+                                </div>
+                              ))}
+                            </div>
+                          </div>
+                        )}
                       </div>
 
                       {/* Power rewrite representation skeleton */}

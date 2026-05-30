@@ -337,6 +337,20 @@ Analyze this draft. Provide highly specific feedback on phrasing, professional s
               },
               description: "Clunky corporate phrases to replace with streamlined direct/rich business vocab."
             },
+            commonGrammarErrors: {
+              type: Type.ARRAY,
+              items: {
+                type: Type.OBJECT,
+                required: ["errorType", "description", "example", "correction"],
+                properties: {
+                  errorType: { type: Type.STRING, description: "Type of grammatical error (e.g. Agreement, Tense, Prepositions)" },
+                  description: { type: Type.STRING, description: "Explanation of the rule in Portuguese" },
+                  example: { type: Type.STRING, description: "The incorrect snippet from the user's text" },
+                  correction: { type: Type.STRING, description: "The corrected snippet" }
+                }
+              },
+              description: "Top 3 most common grammatical errors in the user's draft."
+            },
             suggestedRewrite: { type: Type.STRING, description: "Power rewrite incorporating premium business vocabulary" },
             coachingCommentary: { type: Type.STRING, description: "Direct coaching on register, style, and vocabulary" }
           }

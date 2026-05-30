@@ -230,6 +230,14 @@ export function analyzeWritingOffline(draftText: string, keywordsExpected: strin
     diplomacyScore,
     persuasivenessScore,
     redundancies: draftText.length < 50 ? redundancies : [],
+    commonGrammarErrors: [
+      {
+        errorType: "Preposição Indevida",
+        description: "Em inglês, certos verbos como 'discuss' e 'contact' são transitivos diretos, não necessitando preposições como 'about' ou 'with'.",
+        example: "discuss about the project",
+        correction: "discuss the project"
+      }
+    ],
     suggestedRewrite: draftText ? `Dear Partner,\n\nFollowing our system evaluation, we are implementing our structural API transition. We assure a 6-month support matrix to secure an uninterrupted service runway for your engineers.\n\nBest regards,\nExecutive Team` : "Escreva seu e-mail de treino primeiro para receber uma sugestão profissional de redação executiva otimizada!",
     coachingCommentary: draftText.length < 50 
       ? "Seu rascunho está muito breve. Tente adicionar jargões corporativos estratégicos para demonstrar maior segurança operacional aos parceiros externos."
