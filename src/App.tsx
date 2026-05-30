@@ -4,7 +4,6 @@ import Dashboard from "./components/Dashboard";
 import { UserProfile, PerformanceStats, LessonPlan, CallMessage, CompletedLesson, OralFeedback, WritingFeedback } from "./types";
 import { OFFLINE_LESSONS, getOfflineVideoCallResponse, analyzeWritingOffline, analyzePronunciationOffline } from "./data";
 import { initAuth, googleSignIn, logout } from "./auth";
-import { createGoogleTask } from "./tasks";
 import {
   Award,
   Zap,
@@ -37,16 +36,16 @@ import {
 export default function App() {
   // Theme state: 'light' ou 'dark' (para estudo noturno em baixa luminosidade)
   const [theme, setTheme] = useState<"light" | "dark">(() => {
-    return (localStorage.getItem("eloquent_theme") as "light" | "dark") || "dark";
+    return (localStorage.getItem("fluentops_theme") as "light" | "dark") || "dark";
   });
 
   useEffect(() => {
-    localStorage.setItem("eloquent_theme", theme);
+    localStorage.setItem("fluentops_theme", theme);
   }, [theme]);
 
   // 1. Profile & Session states
   const [profile, setProfile] = useState<UserProfile | null>(() => {
-    const saved = localStorage.getItem("eloquent_profile");
+    const saved = localStorage.getItem("fluentops_profile");
     return saved ? JSON.parse(saved) : null;
   });
 
@@ -55,70 +54,19 @@ export default function App() {
   const [offlineMode, setOfflineMode] = useState(false);
   const [isServerHealthy, setIsServerHealthy] = useState(true);
 
-  // Google Auth & Tasks States
-  const [needsAuth, setNeedsAuth] = useState(true);
-  const [isLoggingIn, setIsLoggingIn] = useState(false);
-  const [isCreatingTask, setIsCreatingTask] = useState(false);
-
-  useEffect(() => {
-    const unsubscribe = initAuth(
-      () => setNeedsAuth(false),
-      () => setNeedsAuth(true)
-    );
-    return () => unsubscribe();
-  }, []);
-
-  const handleGoogleLogin = async () => {
-    setIsLoggingIn(true);
-    try {
-      await googleSignIn();
-      setNeedsAuth(false);
-    } catch (err) {
-      console.error('Login failed:', err);
-    } finally {
-      setIsLoggingIn(false);
-    }
-  };
-
   const handleAppLogout = async () => {
     try {
-      if (!needsAuth) {
-        await logout();
-        setNeedsAuth(true);
-      }
+      await logout();
     } catch (err) {
       console.error('Logout failed:', err);
     }
-    localStorage.removeItem("eloquent_profile");
+    localStorage.removeItem("fluentops_profile");
     setProfile(null);
-  };
-
-  const handleCreateMissedTask = async (taskName: string) => {
-    if (needsAuth) {
-      alert("Por favor, faça login com o Google primeiro.");
-      return;
-    }
-    const confirmed = window.confirm(`Você deseja agendar uma revisão para '${taskName}' no Google Tasks?`);
-    if (!confirmed) return;
-
-    setIsCreatingTask(true);
-    try {
-      await createGoogleTask(
-        `[Eloquent Speak] Revisar: ${taskName}`,
-        `Lembrete de estudo.\nTópico original: ${taskName}`
-      );
-      alert("Anotação adicionada com sucesso ao Google Tasks!");
-    } catch (err) {
-      console.error("Failed to create task", err);
-      alert("Erro ao criar anotação no Google Tasks. Certifique-se de ter concedido a permissão.");
-    } finally {
-      setIsCreatingTask(false);
-    }
   };
 
   // 2. Statistics & Tracking (Persisted locally)
   const [stats, setStats] = useState<PerformanceStats>(() => {
-    const saved = localStorage.getItem("eloquent_stats");
+    const saved = localStorage.getItem("fluentops_stats");
     if (saved) return JSON.parse(saved);
     return {
       lessonsCompleted: 3,
@@ -139,7 +87,7 @@ export default function App() {
   });
 
   const [completedLessons, setCompletedLessons] = useState<CompletedLesson[]>(() => {
-    const saved = localStorage.getItem("eloquent_lessons");
+    const saved = localStorage.getItem("fluentops_lessons");
     if (saved) return JSON.parse(saved);
     return [
       { id: "pre_1", date: "25 de mai", type: "vocabulary", title: "Treino de Termos de Alavancagem", score: 85 },
@@ -150,15 +98,15 @@ export default function App() {
 
   // Save states helper
   useEffect(() => {
-    if (profile) localStorage.setItem("eloquent_profile", JSON.stringify(profile));
+    if (profile) localStorage.setItem("fluentops_profile", JSON.stringify(profile));
   }, [profile]);
 
   useEffect(() => {
-    localStorage.setItem("eloquent_stats", JSON.stringify(stats));
+    localStorage.setItem("fluentops_stats", JSON.stringify(stats));
   }, [stats]);
 
   useEffect(() => {
-    localStorage.setItem("eloquent_lessons", JSON.stringify(completedLessons));
+    localStorage.setItem("fluentops_lessons", JSON.stringify(completedLessons));
   }, [completedLessons]);
 
   // Check backend server status
@@ -696,8 +644,8 @@ export default function App() {
 
   const handleResetProgress = () => {
     if (confirm("Tem certeza de que deseja apagar todo o seu progresso de estudo e notas?")) {
-      localStorage.removeItem("eloquent_stats");
-      localStorage.removeItem("eloquent_lessons");
+      localStorage.removeItem("fluentops_stats");
+      localStorage.removeItem("fluentops_lessons");
       setStats({
         lessonsCompleted: 0,
         vocabularyAcquired: 0,
@@ -719,29 +667,26 @@ export default function App() {
   if (!profile) {
     return <Onboarding onComplete={(newProfile) => {
       setProfile(newProfile);
-      setTheme((localStorage.getItem("eloquent_theme") as "light" | "dark") || "dark");
+      setTheme((localStorage.getItem("fluentops_theme") as "light" | "dark") || "dark");
     }} />;
   }
 
   return (
     <div className={`flex h-screen w-full overflow-hidden font-sans transition-colors duration-300 ${theme === 'dark' ? "bg-[#0f111a] text-[#f1f5f9]" : "bg-[#fcfcfc] text-neutral-900"}`}>
       
-      {/* minimalist navigation sidebar - eloquent style focus */}
+      {/* minimalist navigation sidebar - fluentops style focus */}
       {!isImmersiveMode && (
       <aside className={`w-64 h-full flex flex-col p-6 shrink-0 shadow-xs border-r transition-all duration-300 ${theme === 'dark' ? "bg-[#161a24] border-[#242936]" : "bg-white border-neutral-200"}`} id="nav-sidebar">
         
         {/* elegant logo branding component */}
         <div className="flex items-center gap-3 mb-10">
           <div className={`w-8 h-8 rounded flex items-center justify-center ${theme === 'dark' ? "bg-white text-neutral-950" : "bg-neutral-950 text-white"}`}>
-            <span className="font-semibold text-sm">EQ</span>
+            <span className="font-semibold text-sm">FO</span>
           </div>
           <div>
             <h1 className={`text-base font-display font-semibold tracking-tight ${theme === 'dark' ? "text-white" : "text-neutral-950"}`}>
-              Eloquent Speak
+              FluentOps
             </h1>
-            <p className="text-[10px] text-neutral-400 uppercase font-bold tracking-widest leading-none">
-              Business Coach
-            </p>
           </div>
         </div>
 
@@ -923,11 +868,6 @@ export default function App() {
               onResetProgress={handleResetProgress}
               setActiveTab={setActiveTab}
               theme={theme}
-              needsAuth={needsAuth}
-              isLoggingIn={isLoggingIn}
-              isCreatingTask={isCreatingTask}
-              onGoogleLogin={handleGoogleLogin}
-              onCreateTask={handleCreateMissedTask}
             />
           )}
 

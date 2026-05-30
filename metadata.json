@@ -1,6 +1,6 @@
 {
-  "name": "Business English Coach",
-  "description": "A minimalist professional English tutor focusing on business vocabulary, communication templates, interactive simulated video calls, and AI-driven feedback.",
+  "name": "FluentOps",
+  "description": "Somos o inglês que roda em produção. Deploy your english.",
   "requestFramePermissions": ["microphone"],
   "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
 }

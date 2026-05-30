@@ -14,13 +14,13 @@ export default function Onboarding({ onComplete }: OnboardingProps) {
 
   // Alinhado ao tema global ("light" ou "dark")
   const [theme, setTheme] = useState<"light" | "dark">(() => {
-    return (localStorage.getItem("eloquent_theme") as "light" | "dark") || "dark";
+    return (localStorage.getItem("fluentops_theme") as "light" | "dark") || "dark";
   });
 
   const toggleTheme = () => {
     const nextTheme = theme === "light" ? "dark" : "light";
     setTheme(nextTheme);
-    localStorage.setItem("eloquent_theme", nextTheme);
+    localStorage.setItem("fluentops_theme", nextTheme);
   };
 
   const handleSubmit = (e: React.FormEvent) => {
@@ -55,7 +55,7 @@ export default function Onboarding({ onComplete }: OnboardingProps) {
               <Globe className="w-6 h-6" />
             </div>
             <span className={`font-display font-bold text-xl tracking-tight ${isDark ? "text-white" : "text-neutral-900"}`}>
-              Eloquent
+              FluentOps
             </span>
           </div>
           
@@ -80,12 +80,12 @@ export default function Onboarding({ onComplete }: OnboardingProps) {
           </div>
           
           <h1 className={`text-4xl md:text-5xl lg:text-6xl font-display font-medium tracking-tight leading-[1.1] mb-6 ${isDark ? "text-white" : "text-neutral-900"}`}>
-            Domine o ambiente <br className="hidden md:block"/>
-            corporativo global
+            Somos o inglês que <br className="hidden md:block"/>
+            roda em produção.
           </h1>
           
           <p className={`text-base md:text-lg leading-relaxed max-w-md mb-10 ${isDark ? "text-neutral-400" : "text-neutral-500"}`}>
-            Treine apresentações, reuniões e e-mails em inglês com feedbacks em tempo real de um tutor de IA especializado no seu negócio.
+            O APP de aprendizado feito para mentes técnicas. O inglês que funciona, idealizado em alto nível para profissionais de alto nível. Deploy your English.
           </p>
 
           <div className="space-y-4">
@@ -108,7 +108,7 @@ export default function Onboarding({ onComplete }: OnboardingProps) {
           isDark ? "bg-white/5 border-white/10" : "bg-neutral-50 border-neutral-200"
         }`}>
            <p className={`text-sm italic leading-relaxed ${isDark ? "text-neutral-300" : "text-neutral-600"}`}>
-             "As simulações de Pitch do Eloquent ajudaram a criar e refinar minha argumentação perante a diretoria global em Nova York."
+             "As simulações de Pitch do FluentOps ajudaram a criar e refinar minha argumentação perante a diretoria global em Nova York."
            </p>
            <div className="mt-4 flex items-center gap-3">
              <div className="w-9 h-9 rounded-full bg-gradient-to-br from-indigo-500 to-purple-500 flex items-center justify-center text-white text-xs font-bold shadow-inner">MR</div>
