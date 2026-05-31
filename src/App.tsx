@@ -747,7 +747,7 @@ export default function App() {
 
       {/* minimalist navigation sidebar - fluentops style focus */}
       {!isImmersiveMode && (
-      <aside className={`h-full flex flex-col pt-6 pb-6 shrink-0 shadow-xs border-r transition-all duration-300 z-10 ${isSidebarCollapsed ? "w-20 px-2 items-center" : "w-64 px-6"} ${theme === 'dark' ? "bg-[#151422] border-[#282A3E]" : "bg-white border-neutral-200"}`} id="nav-sidebar">
+      <aside className={`hidden md:flex h-full flex-col pt-6 pb-6 shrink-0 shadow-xs border-r transition-all duration-300 z-10 ${isSidebarCollapsed ? "w-20 px-2 items-center" : "w-64 px-6"} ${theme === 'dark' ? "bg-[#151422] border-[#282A3E]" : "bg-white border-neutral-200"}`} id="nav-sidebar">
         
         {/* elegant logo branding component */}
         <div className={`flex items-center mb-10 ${isSidebarCollapsed ? "flex-col gap-4 w-full" : "gap-3 w-full"}`}>
@@ -957,7 +957,7 @@ export default function App() {
         </header>
 
         {/* scrollable panel content */}
-        <div className="flex-1 overflow-y-auto p-4 md:p-8" id="viewport-scrollable-content">
+        <div className="flex-1 overflow-y-auto p-4 pb-20 md:p-8" id="viewport-scrollable-content">
           
           {/* TAB 1: CORE CONTROL DASHBOARD */}
           {activeTab === "dashboard" && (
@@ -1888,6 +1888,95 @@ export default function App() {
                 Conceder Permissão
               </button>
             </div>
+          </div>
+        </div>
+      )}
+
+      {/* Mobile Bottom Tab Bar (Nebula Hub Style) */}
+      {!isImmersiveMode && (
+        <div className={`md:hidden fixed bottom-0 left-0 right-0 z-40 border-t backdrop-blur-md transition-all duration-300 ${
+          theme === 'dark' 
+            ? "bg-[#151422]/95 border-[#282A3E] shadow-2xl" 
+            : "bg-white/95 border-neutral-200 shadow-lg"
+        }`}>
+          <div className="flex justify-around items-center h-16 px-2">
+            
+            {/* Tab: Dashboard */}
+            <button
+              onClick={() => setActiveTab("dashboard")}
+              className={`flex flex-col items-center justify-center flex-1 h-full py-1.5 transition-all gap-1 cursor-pointer ${
+                activeTab === "dashboard"
+                  ? (theme === 'dark' ? "text-white font-semibold" : "text-neutral-950 font-semibold")
+                  : (theme === 'dark' ? "text-neutral-400" : "text-neutral-500")
+              }`}
+            >
+              <div className={`p-1 px-3 rounded-full transition-all ${
+                activeTab === "dashboard"
+                  ? (theme === 'dark' ? "bg-[#5542F6] text-white" : "bg-neutral-950 text-white")
+                  : "bg-transparent hover:bg-neutral-500/10"
+              }`}>
+                <Sliders className="w-4 h-4 shrink-0" />
+              </div>
+              <span className="text-[9px] uppercase tracking-wider scale-95">Painel</span>
+            </button>
+
+            {/* Tab: Lessons */}
+            <button
+              onClick={() => setActiveTab("lessons")}
+              className={`flex flex-col items-center justify-center flex-1 h-full py-1.5 transition-all gap-1 cursor-pointer ${
+                activeTab === "lessons"
+                  ? (theme === 'dark' ? "text-white font-semibold" : "text-neutral-950 font-semibold")
+                  : (theme === 'dark' ? "text-neutral-400" : "text-neutral-500")
+              }`}
+            >
+              <div className={`p-1 px-3 rounded-full transition-all ${
+                activeTab === "lessons"
+                  ? (theme === 'dark' ? "bg-[#5542F6] text-white" : "bg-neutral-950 text-white")
+                  : "bg-transparent hover:bg-neutral-500/10"
+              }`}>
+                <BookOpen className="w-4 h-4 shrink-0" />
+              </div>
+              <span className="text-[9px] uppercase tracking-wider scale-95">Lições</span>
+            </button>
+
+            {/* Tab: Calls */}
+            <button
+              onClick={() => setActiveTab("calls")}
+              className={`flex flex-col items-center justify-center flex-1 h-full py-1.5 transition-all gap-1 cursor-pointer ${
+                activeTab === "calls"
+                  ? (theme === 'dark' ? "text-white font-semibold" : "text-neutral-950 font-semibold")
+                  : (theme === 'dark' ? "text-neutral-400" : "text-neutral-500")
+              }`}
+            >
+              <div className={`p-1 px-3 rounded-full transition-all ${
+                activeTab === "calls"
+                  ? (theme === 'dark' ? "bg-[#5542F6] text-white" : "bg-neutral-950 text-white")
+                  : "bg-transparent hover:bg-neutral-500/10"
+              }`}>
+                <Video className="w-4 h-4 shrink-0" />
+              </div>
+              <span className="text-[9px] uppercase tracking-wider scale-95">Reunião</span>
+            </button>
+
+            {/* Tab: Writing */}
+            <button
+              onClick={() => setActiveTab("writing")}
+              className={`flex flex-col items-center justify-center flex-1 h-full py-1.5 transition-all gap-1 cursor-pointer ${
+                activeTab === "writing"
+                  ? (theme === 'dark' ? "text-white font-semibold" : "text-neutral-950 font-semibold")
+                  : (theme === 'dark' ? "text-neutral-400" : "text-neutral-500")
+              }`}
+            >
+              <div className={`p-1 px-3 rounded-full transition-all ${
+                activeTab === "writing"
+                  ? (theme === 'dark' ? "bg-[#5542F6] text-white" : "bg-neutral-950 text-white")
+                  : "bg-transparent hover:bg-neutral-500/10"
+              }`}>
+                <FileText className="w-4 h-4 shrink-0" />
+              </div>
+              <span className="text-[9px] uppercase tracking-wider scale-95">Redação</span>
+            </button>
+
           </div>
         </div>
       )}
