@@ -1,6 +1,6 @@
 import React from "react";
 import { UserProfile, PerformanceStats, CompletedLesson } from "../types";
-import { Award, Zap, BookOpen, Clock, BarChart3, RotateCcw, CalendarPlus, Loader2 } from "lucide-react";
+import { Award, Zap, BookOpen, Clock, BarChart3, RotateCcw, CalendarPlus, Loader2, Lightbulb, Target, Sparkles } from "lucide-react";
 
 interface DashboardProps {
   profile: UserProfile;
@@ -123,6 +123,80 @@ export default function Dashboard({
             >
               <RotateCcw className="w-4 h-4" />
             </button>
+          </div>
+        </div>
+      </div>
+
+      {/* EXPERIMENTAL DASHBOARD IDEAS */}
+      <h2 className="text-[10px] font-bold uppercase tracking-widest text-neutral-400 -mb-4 mt-8 ml-2">
+        Novidades / Acesso Rápido
+      </h2>
+      <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+        {/* 1. Frase Executiva do Dia */}
+        <div className={`p-5 rounded-2xl border flex flex-col gap-3 transition-all duration-300 relative overflow-hidden ${
+          isDark ? "bg-[#161a24] border-indigo-900/30" : "bg-white border-indigo-100"
+        }`}>
+          <div className={`absolute -right-4 -top-4 w-16 h-16 rounded-full blur-2xl ${
+            isDark ? "bg-indigo-600/10" : "bg-indigo-600/5"
+          }`} />
+          <div className="flex items-center justify-between">
+            <h3 className="text-[10px] font-bold uppercase tracking-wider text-indigo-500 mb-1 flex items-center gap-1.5">
+              <Lightbulb className="w-3.5 h-3.5" /> Frase Executiva do Dia
+            </h3>
+          </div>
+          <div className="z-10">
+            <p className={`text-base font-display font-semibold ${isDark ? "text-neutral-200" : "text-neutral-800"}`}>
+              "To circle back"
+            </p>
+            <p className={`text-[11px] leading-relaxed mt-1 ${isDark ? "text-neutral-400" : "text-neutral-500"}`}>
+              Use para retomar um assunto em andamento posteriormente de forma elegante. Ex: <i>"Let's circle back to this offline."</i>
+            </p>
+          </div>
+        </div>
+
+        {/* 2. Próximo Passo Recomendado (Baseado em IA) */}
+        <div className={`p-5 rounded-2xl border flex flex-col gap-3 transition-all duration-300 relative overflow-hidden ${
+          isDark ? "bg-[#161a24] border-rose-900/30" : "bg-white border-rose-100"
+        }`}>
+          <div className={`absolute -right-4 -top-4 w-16 h-16 rounded-full blur-2xl ${
+            isDark ? "bg-rose-600/10" : "bg-rose-600/5"
+          }`} />
+          <div className="flex items-center justify-between">
+            <h3 className="text-[10px] font-bold uppercase tracking-wider text-rose-500 mb-1 flex items-center gap-1.5">
+              <Target className="w-3.5 h-3.5" /> Foco de Hoje
+            </h3>
+            <span className={`text-[9px] px-1.5 py-0.5 rounded uppercase font-bold tracking-wider ${
+              isDark ? "bg-rose-500/20 text-rose-400" : "bg-rose-100 text-rose-600"
+            }`}>
+              Fluência
+            </span>
+          </div>
+          <div className="z-10">
+            <p className={`text-sm font-semibold ${isDark ? "text-neutral-200" : "text-neutral-800"}`}>
+              Sua Fluência está em {stats.fluencyScore}%
+            </p>
+            <p className={`text-[11px] leading-relaxed mt-1 ${isDark ? "text-neutral-400" : "text-neutral-500"}`}>
+              Baseado nos seus últimos treinos, que tal focarmos em ritmo e conectores na fala hoje?
+            </p>
+          </div>
+        </div>
+
+        {/* 3. Acesso Rápido - Simulação Rápida */}
+        <div className={`p-5 rounded-2xl border flex flex-col gap-3 transition-all duration-300 relative overflow-hidden ${
+          isDark ? "bg-gradient-to-br from-[#161a24] to-blue-900/10 border-blue-900/30 hover:border-blue-500/50" : "bg-gradient-to-br from-white to-blue-50 border-blue-100 hover:border-blue-300"
+        } cursor-pointer group`} onClick={() => setActiveTab("lessons")}>
+          <div className="flex items-center justify-between">
+            <h3 className="text-[10px] font-bold uppercase tracking-wider text-blue-500 mb-1 flex items-center gap-1.5">
+              <Sparkles className="w-3.5 h-3.5" /> Quick Start
+            </h3>
+          </div>
+          <div className="mt-1 z-10">
+            <p className={`text-sm font-semibold flex items-center gap-2 ${isDark ? "text-neutral-200" : "text-neutral-800"}`}>
+              Início Imediato ⚡
+            </p>
+            <p className={`text-[11px] leading-relaxed mt-1 group-hover:text-blue-500 transition-colors ${isDark ? "text-neutral-400" : "text-neutral-500"}`}>
+              Realize uma simulação prática de {translatedFocus.toLowerCase()} focada em fluência verbal.
+            </p>
           </div>
         </div>
       </div>

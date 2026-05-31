@@ -53,6 +53,17 @@ export default function App() {
   const [isImmersiveMode, setIsImmersiveMode] = useState(false);
   const [offlineMode, setOfflineMode] = useState(false);
   const [isServerHealthy, setIsServerHealthy] = useState(true);
+  const [isSidebarCollapsed, setIsSidebarCollapsed] = useState(() => window.innerWidth < 768);
+
+  useEffect(() => {
+    const handleResize = () => {
+      if (window.innerWidth < 768) {
+        setIsSidebarCollapsed(true);
+      }
+    };
+    window.addEventListener('resize', handleResize);
+    return () => window.removeEventListener('resize', handleResize);
+  }, []);
 
   const handleAppLogout = async () => {
     try {
@@ -360,9 +371,43 @@ export default function App() {
   const [callHistory, setCallHistory] = useState<CallMessage[]>([]);
   const [userInputTranscript, setUserInputTranscript] = useState("");
   const [currentEmote, setCurrentEmote] = useState("smiling");
-  const [isCallReponding, setIsCallResponding] = useState(false);
+  const [isCallResponding, setIsCallResponding] = useState(false);
   const [expectedSpeakingHints, setExpectedSpeakingHints] = useState<string[]>([]);
   const [recentTurnAnalysis, setRecentTurnAnalysis] = useState<CallMessage["feedback"] | null>(null);
+
+  // Focus Break Reminder State
+  const [sessionStartTime, setSessionStartTime] = useState<number | null>(null);
+  const [showBreakReminder, setShowBreakReminder] = useState(false);
+
+  useEffect(() => {
+    // 15 continuous minutes on speaking or video call practice
+    const isActive = activeTab === "lessons" || (activeTab === "calls" && callActive);
+    
+    if (isActive && sessionStartTime === null) {
+      setSessionStartTime(Date.now());
+    } else if (!isActive && sessionStartTime !== null) {
+      setSessionStartTime(null);
+      setShowBreakReminder(false);
+    }
+  }, [activeTab, callActive, sessionStartTime]);
+
+  useEffect(() => {
+    if (sessionStartTime !== null) {
+      const interval = setInterval(() => {
+        const elapsed = Date.now() - sessionStartTime;
+        if (elapsed >= 15 * 60 * 1000) {
+           setShowBreakReminder(true);
+        }
+      }, 60000);
+      
+      const elapsed = Date.now() - sessionStartTime;
+      if (elapsed >= 15 * 60 * 1000) {
+        setShowBreakReminder(true);
+      }
+
+      return () => clearInterval(interval);
+    }
+  }, [sessionStartTime]);
 
   // Web Speak Synthesis for Interactive Video Call Partners for realistic audio playback!
   const speakPartnerLine = (txt: string) => {
@@ -676,135 +721,164 @@ export default function App() {
       
       {/* minimalist navigation sidebar - fluentops style focus */}
       {!isImmersiveMode && (
-      <aside className={`w-64 h-full flex flex-col p-6 shrink-0 shadow-xs border-r transition-all duration-300 ${theme === 'dark' ? "bg-[#161a24] border-[#242936]" : "bg-white border-neutral-200"}`} id="nav-sidebar">
+      <aside className={`h-full flex flex-col pt-6 pb-6 shrink-0 shadow-xs border-r transition-all duration-300 ${isSidebarCollapsed ? "w-20 px-2 items-center" : "w-64 px-6"} ${theme === 'dark' ? "bg-[#161a24] border-[#242936]" : "bg-white border-neutral-200"}`} id="nav-sidebar">
         
         {/* elegant logo branding component */}
-        <div className="flex items-center gap-3 mb-10">
-          <div className={`w-8 h-8 rounded flex items-center justify-center ${theme === 'dark' ? "bg-white text-neutral-950" : "bg-neutral-950 text-white"}`}>
+        <div className={`flex items-center mb-10 ${isSidebarCollapsed ? "flex-col gap-4 w-full" : "gap-3 w-full"}`}>
+          <div className={`w-8 h-8 shrink-0 rounded flex items-center justify-center ${theme === 'dark' ? "bg-white text-neutral-950" : "bg-neutral-950 text-white"}`}>
             <span className="font-semibold text-sm">FO</span>
           </div>
-          <div>
-            <h1 className={`text-base font-display font-semibold tracking-tight ${theme === 'dark' ? "text-white" : "text-neutral-950"}`}>
-              FluentOps
-            </h1>
-          </div>
+          {!isSidebarCollapsed && (
+            <div className="flex-1 overflow-hidden">
+              <h1 className={`text-base font-display font-semibold tracking-tight truncate ${theme === 'dark' ? "text-white" : "text-neutral-950"}`}>
+                FluentOps
+              </h1>
+            </div>
+          )}
+          <button
+            onClick={() => setIsSidebarCollapsed(!isSidebarCollapsed)}
+            className={`shrink-0 p-1.5 rounded-lg border transition-colors ${theme === 'dark' ? "border-[#242936] text-neutral-400 hover:bg-[#1d2230]" : "border-neutral-200 text-neutral-500 hover:bg-neutral-100"}`}
+            title={isSidebarCollapsed ? "Expandir Menu" : "Recolher Menu"}
+          >
+            <Sliders className="w-4 h-4" />
+          </button>
         </div>
 
         {/* minimal clean tab indicators list */}
-        <nav className="space-y-1.5 flex-1">
+        <nav className="space-y-1.5 flex-1 w-full">
           <button
             onClick={() => setActiveTab("dashboard")}
-            className={`w-full flex items-center gap-3 px-3 py-2.5 rounded-xl font-medium text-xs transition-all cursor-pointer ${
+            className={`w-full flex items-center py-2.5 rounded-xl font-medium text-xs transition-all cursor-pointer ${isSidebarCollapsed ? "justify-center px-0" : "gap-3 px-3"} ${
               activeTab === "dashboard"
                 ? (theme === 'dark' ? "bg-white text-neutral-950 shadow-xs" : "bg-neutral-950 text-white shadow-xs")
                 : (theme === 'dark' ? "text-neutral-400 hover:bg-[#1e2332] hover:text-white" : "text-neutral-500 hover:bg-neutral-50 hover:text-neutral-950")
             }`}
             id="tab-btn-dashboard"
+            title="Painel de Controle"
           >
-            <Sliders className="w-4 h-4" />
-            Painel de Controle
+            <Sliders className="w-4 h-4 shrink-0" />
+            {!isSidebarCollapsed && <span className="truncate">Painel de Controle</span>}
           </button>
 
           <button
             onClick={() => setActiveTab("lessons")}
-            className={`w-full flex items-center gap-3 px-3 py-2.5 rounded-xl font-medium text-xs transition-all cursor-pointer ${
+            className={`w-full flex items-center py-2.5 rounded-xl font-medium text-xs transition-all cursor-pointer ${isSidebarCollapsed ? "justify-center px-0" : "gap-3 px-3"} ${
               activeTab === "lessons"
                 ? (theme === 'dark' ? "bg-white text-neutral-950 shadow-xs" : "bg-neutral-950 text-white shadow-xs")
                 : (theme === 'dark' ? "text-neutral-400 hover:bg-[#1e2332] hover:text-white" : "text-neutral-500 hover:bg-neutral-50 hover:text-neutral-950")
             }`}
             id="tab-btn-lessons"
+            title="Lições Diárias"
           >
-            <BookOpen className="w-4 h-4" />
-            Lições Diárias
+            <BookOpen className="w-4 h-4 shrink-0" />
+            {!isSidebarCollapsed && <span className="truncate">Lições Diárias</span>}
           </button>
 
           <button
             onClick={() => setActiveTab("calls")}
-            className={`w-full flex items-center gap-3 px-3 py-2.5 rounded-xl font-medium text-xs transition-all cursor-pointer ${
+            className={`w-full flex items-center py-2.5 rounded-xl font-medium text-xs transition-all cursor-pointer ${isSidebarCollapsed ? "justify-center px-0" : "gap-3 px-3"} ${
               activeTab === "calls"
                 ? (theme === 'dark' ? "bg-white text-neutral-950 shadow-xs" : "bg-neutral-950 text-white shadow-xs")
                 : (theme === 'dark' ? "text-neutral-400 hover:bg-[#1e2332] hover:text-white" : "text-neutral-500 hover:bg-neutral-50 hover:text-neutral-950")
             }`}
             id="tab-btn-calls"
+            title="Sala de Reunião"
           >
-            <Video className="w-4 h-4" />
-            Sala de Reunião
+            <Video className="w-4 h-4 shrink-0" />
+            {!isSidebarCollapsed && <span className="truncate">Sala de Reunião</span>}
           </button>
 
           <button
             onClick={() => setActiveTab("writing")}
-            className={`w-full flex items-center gap-3 px-3 py-2.5 rounded-xl font-medium text-xs transition-all cursor-pointer ${
+            className={`w-full flex items-center py-2.5 rounded-xl font-medium text-xs transition-all cursor-pointer ${isSidebarCollapsed ? "justify-center px-0" : "gap-3 px-3"} ${
               activeTab === "writing"
                 ? (theme === 'dark' ? "bg-white text-neutral-950 shadow-xs" : "bg-neutral-950 text-white shadow-xs")
                 : (theme === 'dark' ? "text-neutral-400 hover:bg-[#1e2332] hover:text-white" : "text-neutral-500 hover:bg-neutral-50 hover:text-neutral-950")
             }`}
             id="tab-btn-writing"
+            title="Redação Corporativa"
           >
-            <FileText className="w-4 h-4" />
-            Redação Corporativa
+            <FileText className="w-4 h-4 shrink-0" />
+            {!isSidebarCollapsed && <span className="truncate">Redação Corporativa</span>}
           </button>
         </nav>
 
         {/* offline status widgets footer */}
-        <div className="mt-auto pt-6 border-t border-neutral-100 flex flex-col gap-3">
+        <div className={`mt-auto pt-6 border-t flex flex-col gap-3 ${theme === 'dark' ? "border-[#242936]" : "border-neutral-100"}`}>
           
           {/* Aesthetic Study Mode Toggle */}
-          <div className={`rounded-xl p-3 border transition-colors ${theme === 'dark' ? "bg-[#0e1117] border-[#242936]" : "bg-neutral-50 border-neutral-150"}`}>
-            <div className="flex items-center justify-between">
-              <span className={`text-[10px] font-semibold uppercase tracking-wide ${theme === 'dark' ? "text-neutral-400" : "text-neutral-500"}`}>
-                Modo de Estudo
-              </span>
-              <button
-                onClick={() => setTheme(prev => prev === 'light' ? 'dark' : 'light')}
-                className={`text-[11px] font-semibold px-2.5 py-1 rounded-lg border transition-all flex items-center gap-1.5 cursor-pointer ${
-                  theme === 'dark' 
-                    ? "bg-[#161a24] border-[#242936] text-white hover:bg-[#1d2230]" 
-                    : "bg-white border-neutral-200 text-neutral-700 hover:bg-neutral-100"
-                }`}
-                id="theme-toggle-sidebar"
-              >
-                {theme === 'light' ? <Sun className="w-3.5 h-3.5 text-amber-500" /> : <Moon className="w-3.5 h-3.5 text-indigo-400" />}
-                {theme === 'light' ? 'Limpo' : 'Noite'}
-              </button>
-            </div>
-            <p className="text-[10px] text-neutral-400 mt-1">
-              {theme === 'light' ? 'Visual limpo e minimalista.' : 'Modo escuro para estudo noturno.'}
-            </p>
+          <div className={`rounded-xl p-3 border transition-colors flex ${isSidebarCollapsed ? "justify-center p-2" : "flex-col"} ${theme === 'dark' ? "bg-[#0e1117] border-[#242936]" : "bg-neutral-50 border-neutral-150"}`}>
+            {!isSidebarCollapsed ? (
+              <>
+                <div className="flex items-center justify-between">
+                  <span className={`text-[10px] font-semibold uppercase tracking-wide ${theme === 'dark' ? "text-neutral-400" : "text-neutral-500"}`}>
+                    Modo de Estudo
+                  </span>
+                  <button
+                    onClick={() => setTheme(prev => prev === 'light' ? 'dark' : 'light')}
+                    className={`text-[11px] font-semibold px-2.5 py-1 rounded-lg border transition-all flex items-center gap-1.5 cursor-pointer ${
+                      theme === 'dark' 
+                        ? "bg-[#161a24] border-[#242936] text-white hover:bg-[#1d2230]" 
+                        : "bg-white border-neutral-200 text-neutral-700 hover:bg-neutral-100"
+                    }`}
+                    id="theme-toggle-sidebar"
+                  >
+                    {theme === 'light' ? <Sun className="w-3.5 h-3.5 text-amber-500" /> : <Moon className="w-3.5 h-3.5 text-indigo-400" />}
+                    {theme === 'light' ? 'Limpo' : 'Noite'}
+                  </button>
+                </div>
+                <p className="text-[10px] text-neutral-400 mt-1">
+                  {theme === 'light' ? 'Visual limpo e minimalista.' : 'Modo escuro para estudo noturno.'}
+                </p>
+              </>
+            ) : (
+                <button
+                  onClick={() => setTheme(prev => prev === 'light' ? 'dark' : 'light')}
+                  className={`p-1 transition-colors ${theme === 'dark' ? "text-neutral-400 hover:text-white" : "text-neutral-500 hover:text-neutral-900"}`}
+                  title="Alternar Tema"
+                >
+                  {theme === 'light' ? <Moon className="w-4 h-4" /> : <Sun className="w-4 h-4" />}
+                </button>
+            )}
           </div>
 
           {/* Interactive offline switch element */}
-          <div className={`rounded-xl p-3 border transition-colors ${theme === 'dark' ? "bg-[#0e1117] border-[#242936]" : "bg-neutral-50 border-neutral-150"}`}>
-            <div className="flex items-center justify-between">
-              <span className={`text-[10px] font-semibold uppercase tracking-wide ${theme === 'dark' ? "text-[#9ca3af]" : "text-neutral-500"}`}>
-                Modo Offline Ativo
-              </span>
-              <input
-                type="checkbox"
-                checked={offlineMode}
-                onChange={(e) => setOfflineMode(e.target.checked)}
-                className="w-8 h-4 rounded-full bg-neutral-300 accent-neutral-950 cursor-pointer text-xs"
-                id="offline-toggle-input"
-              />
-            </div>
-            <p className="text-[10px] text-neutral-400 mt-1">
-              {offlineMode 
-                ? "Usando cache local. Economiza dados e bateria." 
-                : isServerHealthy 
-                  ? "Análise do Gemini ativa em tempo real." 
-                  : "Servidor offline - análise local ativa."}
-            </p>
-          </div>
-
-          <div className="flex items-center gap-3 pt-1">
-            <div className={`w-8 h-8 rounded-full flex items-center justify-center text-xs font-semibold uppercase ${theme === 'dark' ? "bg-white text-neutral-900" : "bg-neutral-900 text-white"}`}>
-              {profile.name.slice(0, 2)}
-            </div>
-            <div className="flex-1 min-w-0">
-              <p className={`text-xs font-semibold truncate ${theme === 'dark' ? "text-white" : "text-neutral-950"}`}>{profile.name}</p>
-              <p className="text-[10px] text-neutral-400 truncate mt-0.5 font-medium uppercase tracking-wider">
-                {profile.industry === 'Technology' ? 'Tecnologia' : profile.industry === 'Finance' ? 'Finanças' : 'Gestão Geral'}
+          {!isSidebarCollapsed && (
+            <div className={`rounded-xl p-3 border transition-colors ${theme === 'dark' ? "bg-[#0e1117] border-[#242936]" : "bg-neutral-50 border-neutral-150"}`}>
+              <div className="flex items-center justify-between">
+                <span className={`text-[10px] font-semibold uppercase tracking-wide ${theme === 'dark' ? "text-[#9ca3af]" : "text-neutral-500"}`}>
+                  Modo Offline Ativo
+                </span>
+                <input
+                  type="checkbox"
+                  checked={offlineMode}
+                  onChange={(e) => setOfflineMode(e.target.checked)}
+                  className="w-8 h-4 rounded-full bg-neutral-300 accent-neutral-950 cursor-pointer text-xs"
+                  id="offline-toggle-input"
+                />
+              </div>
+              <p className="text-[10px] text-neutral-400 mt-1">
+                {offlineMode 
+                  ? "Usando cache local. Economiza dados e bateria." 
+                  : isServerHealthy 
+                    ? "Análise do Gemini ativa em tempo real." 
+                    : "Servidor offline - análise local ativa."}
               </p>
             </div>
+          )}
+
+          <div className={`flex items-center pt-1 ${isSidebarCollapsed ? "justify-center flex-col gap-4" : "gap-3"}`}>
+            <div className={`w-8 h-8 shrink-0 rounded-full flex items-center justify-center text-xs font-semibold uppercase ${theme === 'dark' ? "bg-white text-neutral-900" : "bg-neutral-900 text-white"}`} title={profile.name}>
+              {profile.name.slice(0, 2)}
+            </div>
+            {!isSidebarCollapsed && (
+              <div className="flex-1 min-w-0">
+                <p className={`text-xs font-semibold truncate ${theme === 'dark' ? "text-white" : "text-neutral-950"}`}>{profile.name}</p>
+                <p className="text-[10px] text-neutral-400 truncate mt-0.5 font-medium uppercase tracking-wider">
+                  {profile.industry === 'Technology' ? 'Tecnologia' : profile.industry === 'Finance' ? 'Finanças' : 'Gestão Geral'}
+                </p>
+              </div>
+            )}
             <button
               onClick={handleAppLogout}
               className={`p-2 rounded-lg transition-colors cursor-pointer shrink-0 ${theme === 'dark' ? "hover:bg-[#1e2332] text-neutral-500 hover:text-white" : "hover:bg-neutral-100 text-neutral-400 hover:text-neutral-900"}`}
@@ -818,18 +892,18 @@ export default function App() {
       )}
 
       {/* Main viewport area */}
-      <main className="flex-1 flex flex-col h-full overflow-hidden">
+      <main className="flex-1 flex flex-col h-full overflow-hidden w-full">
         
         {/* minimalist clean header panel */}
-        <header className={`h-16 border-b px-8 flex items-center justify-between shrink-0 transition-colors duration-300 ${theme === 'dark' ? "bg-[#161a25] border-[#242936]" : "bg-white border-neutral-200"}`}>
-          <div className="flex items-center gap-4">
-            <h2 className="text-[11px] font-bold text-neutral-400 uppercase tracking-widest animate-fade-in">
-              Espaço Executivo / {activeTab === "dashboard" ? "Visualização Geral" : activeTab === "lessons" ? "Planejamento Lírico" : activeTab === "calls" ? "Videochamada Simulada" : "Redação Analítica"}
+        <header className={`h-16 border-b px-4 md:px-8 flex items-center justify-between shrink-0 transition-colors duration-300 ${theme === 'dark' ? "bg-[#161a25] border-[#242936]" : "bg-white border-neutral-200"}`}>
+          <div className="flex items-center gap-3 md:gap-4 overflow-hidden mr-4">
+            <h2 className="text-[10px] md:text-[11px] font-bold text-neutral-400 uppercase tracking-widest animate-fade-in truncate">
+              <span className="hidden sm:inline">Espaço Executivo / </span>{activeTab === "dashboard" ? "Visualização Geral" : activeTab === "lessons" ? "Planejamento Lírico" : activeTab === "calls" ? "Videochamada Simulada" : "Redação Analítica"}
             </h2>
             {(activeTab === "lessons" || activeTab === "calls") && (
               <button
                 onClick={() => setIsImmersiveMode(!isImmersiveMode)}
-                className={`flex items-center gap-1.5 px-2.5 py-1.5 rounded-md text-[10px] font-bold uppercase tracking-wider transition-colors border ${
+                className={`flex items-center shrink-0 gap-1.5 px-2.5 py-1.5 rounded-md text-[10px] font-bold uppercase tracking-wider transition-colors border ${
                   isImmersiveMode 
                     ? "bg-blue-600/10 border-blue-500/30 text-blue-500 hover:bg-blue-600/20" 
                     : (theme === "dark" ? "bg-[#242936] border-transparent text-neutral-300 hover:bg-[#2a3040]" : "bg-neutral-100 border-transparent text-neutral-600 hover:bg-neutral-200")
@@ -837,17 +911,17 @@ export default function App() {
                 title="Alternar Modo Imersivo"
               >
                 {isImmersiveMode ? <Minimize className="w-3.5 h-3.5" /> : <Maximize className="w-3.5 h-3.5" />}
-                {isImmersiveMode ? "Sair do Modo Imersivo" : "Modo Imersivo"}
+                <span className="hidden md:inline">{isImmersiveMode ? "Sair do Modo Imersivo" : "Modo Imersivo"}</span>
               </button>
             )}
           </div>
 
-          <div className="flex items-center gap-6">
-            <div className="text-right">
+          <div className="flex items-center gap-3 md:gap-6 shrink-0">
+            <div className="text-right hidden sm:block">
               <p className="text-[10px] text-neutral-400 uppercase font-bold tracking-widest">Estudo Realizado Hoje</p>
               <p className={`text-xs font-semibold mt-0.5 ${theme === 'dark' ? "text-white" : "text-neutral-900"}`}>{stats.speakingTimeMinutes} / {profile.dailyGoalMinutes} min</p>
             </div>
-            <div className={`w-32 h-1.5 rounded-full overflow-hidden ${theme === 'dark' ? "bg-[#1d2230]" : "bg-neutral-100"}`}>
+            <div className={`w-16 md:w-32 h-1.5 rounded-full overflow-hidden ${theme === 'dark' ? "bg-[#1d2230]" : "bg-neutral-100"}`} title={`${stats.speakingTimeMinutes}/${profile.dailyGoalMinutes} min`}>
               <div 
                 className={`h-full transition-all duration-300 ${theme === 'dark' ? "bg-white" : "bg-neutral-950"}`}
                 style={{ width: `${Math.min(100, (stats.speakingTimeMinutes / profile.dailyGoalMinutes) * 100)}%` }}
@@ -857,7 +931,7 @@ export default function App() {
         </header>
 
         {/* scrollable panel content */}
-        <div className="flex-1 overflow-y-auto p-8" id="viewport-scrollable-content">
+        <div className="flex-1 overflow-y-auto p-4 md:p-8" id="viewport-scrollable-content">
           
           {/* TAB 1: CORE CONTROL DASHBOARD */}
           {activeTab === "dashboard" && (
@@ -1344,7 +1418,7 @@ export default function App() {
                         <div className="relative">
                           {/* Emote animation indicator borders */}
                           <div className={`absolute -inset-1.5 rounded-full border-1.5 border-dashed ${
-                            isCallReponding ? "border-sky-500 animate-spin" : "border-neutral-700"
+                            isCallResponding ? "border-sky-500 animate-spin" : "border-neutral-700"
                           }`} />
                           
                           <div className={`w-32 h-32 rounded-full border-4 border-neutral-800 bg-neutral-900 flex items-center justify-center shadow-2xl transition-all ${
@@ -1387,7 +1461,7 @@ export default function App() {
                         </div>
                       ))}
 
-                      {isCallReponding && (
+                      {isCallResponding && (
                         <div className="text-xs text-neutral-400 italic animate-pulse">
                           {currentLesson.videoCallScenario.partnerName} está formulando resposta...
                         </div>
@@ -1433,7 +1507,7 @@ export default function App() {
 
                       <button
                         onClick={() => handleSendCallResponse()}
-                        disabled={isCallReponding || !userInputTranscript.trim()}
+                        disabled={isCallResponding || !userInputTranscript.trim()}
                         className={`flex-1 rounded-xl text-xs font-bold transition-all flex items-center justify-center gap-1.5 cursor-pointer disabled:opacity-40 ${
                           theme === 'dark'
                             ? "bg-white text-[#0e1117] hover:bg-neutral-200"
@@ -1730,6 +1804,33 @@ export default function App() {
 
         </div>
       </main>
+
+      {/* Break Reminder Overlay */}
+      {showBreakReminder && (
+        <div className="fixed bottom-6 right-6 z-50 animate-in slide-in-from-bottom-5 fade-in duration-300">
+          <div className={`p-4 rounded-xl shadow-lg border flex items-start gap-4 max-w-sm ${theme === 'dark' ? "bg-[#161a24] border-[#242936] text-white" : "bg-white border-neutral-200 text-neutral-900"}`}>
+            <div className={`p-2 rounded-full mt-1 shrink-0 ${theme === 'dark' ? "bg-amber-500/10 text-amber-500" : "bg-amber-100 text-amber-600"}`}>
+              <Clock className="w-5 h-5" />
+            </div>
+            <div className="flex-1">
+              <h4 className="text-sm font-semibold mb-1">Pausa Recomendada</h4>
+              <p className={`text-xs leading-relaxed ${theme === 'dark' ? "text-neutral-400" : "text-neutral-500"}`}>
+                Você está praticando ativamente há mais de 15 minutos sem intervalo. Pequenas pausas ajudam a consolidar a fluência e a reter vocabulário novo.
+              </p>
+            </div>
+            <button 
+              onClick={() => {
+                setShowBreakReminder(false);
+                setSessionStartTime(Date.now()); // Reset timer
+              }}
+              className="text-neutral-400 hover:text-neutral-600 transition-colors shrink-0"
+              title="Ignorar"
+            >
+              <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M18 6 6 18"/><path d="m6 6 12 12"/></svg>
+            </button>
+          </div>
+        </div>
+      )}
 
     </div>
   );
