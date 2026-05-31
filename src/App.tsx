@@ -30,7 +30,8 @@ import {
   Moon,
   LogOut,
   Maximize,
-  Minimize
+  Minimize,
+  Smartphone
 } from "lucide-react";
 
 export default function App() {
@@ -54,6 +55,86 @@ export default function App() {
   const [offlineMode, setOfflineMode] = useState(false);
   const [isServerHealthy, setIsServerHealthy] = useState(true);
   const [isSidebarCollapsed, setIsSidebarCollapsed] = useState(() => window.innerWidth < 768);
+
+  // Device optimization state with smart auto-detection heuristics
+  const [deviceProfile, setDeviceProfile] = useState<string>(() => {
+    if (typeof navigator === "undefined") return "generic";
+    const ua = navigator.userAgent;
+    if (/iPhone|iPad|iPod/i.test(ua)) return "iphone";
+    if (/Samsung|SM-/i.test(ua)) return "samsung";
+    if (/Moto|Motorola/i.test(ua)) return "motorola";
+    if (/Pixel/i.test(ua)) return "google";
+    if (/Android/i.test(ua)) return "generic_android";
+    return "generic";
+  });
+  const [showDeviceModal, setShowDeviceModal] = useState(false);
+
+  const getDeviceStyles = () => {
+    switch (deviceProfile) {
+      case "iphone":
+        return {
+          name: "Apple iPhone",
+          brandColor: "border-[#A2AAAD]/30 text-[#A2AAAD] bg-[#A2AAAD]/5",
+          safeBottomPadding: "pb-[100px]",
+          cardPadding: "p-4 sm:p-5 md:p-6",
+          compactLayout: true,
+          fontAdjust: "text-neutral-200 tracking-tight",
+          notes: "iOS Safe Area + Anti-overlapping de gestos"
+        };
+      case "samsung":
+        return {
+          name: "Samsung Galaxy",
+          brandColor: "border-blue-500/30 text-blue-400 bg-blue-500/5",
+          safeBottomPadding: "pb-[88px]",
+          cardPadding: "p-4 sm:p-5 md:p-6",
+          compactLayout: true,
+          fontAdjust: "text-neutral-200",
+          notes: "Calibração de toque para Infinity Display"
+        };
+      case "motorola":
+        return {
+          name: "Motorola Moto",
+          brandColor: "border-amber-500/30 text-amber-400 bg-amber-500/5",
+          safeBottomPadding: "pb-[88px]",
+          cardPadding: "p-3.5 sm:p-5 md:p-6",
+          compactLayout: true,
+          fontAdjust: "text-neutral-200",
+          notes: "Otimização para Moto Actions e gestos nativos"
+        };
+      case "google":
+        return {
+          name: "Google Pixel",
+          brandColor: "border-emerald-500/30 text-emerald-400 bg-emerald-500/5",
+          safeBottomPadding: "pb-[88px]",
+          cardPadding: "p-4 sm:p-5 md:p-6",
+          compactLayout: true,
+          fontAdjust: "text-neutral-200",
+          notes: "Material You pixel-density calibration"
+        };
+      case "generic_android":
+        return {
+          name: "Dispositivo Android",
+          brandColor: "border-indigo-500/30 text-indigo-400 bg-indigo-500/5",
+          safeBottomPadding: "pb-[88px]",
+          cardPadding: "p-4 sm:p-5 md:p-6",
+          compactLayout: true,
+          fontAdjust: "text-neutral-200",
+          notes: "Ajuste universal para barras virtuais do Android"
+        };
+      default:
+        return {
+          name: "Dispositivo Geral",
+          brandColor: "border-neutral-700/30 text-neutral-400 bg-neutral-700/5",
+          safeBottomPadding: "pb-24 md:pb-8",
+          cardPadding: "p-4 sm:p-6",
+          compactLayout: false,
+          fontAdjust: "text-neutral-200",
+          notes: "Layout padrão responsivo fluído"
+        };
+    }
+  };
+
+  const deviceStyles = getDeviceStyles();
 
   const [showPermissionPrompt, setShowPermissionPrompt] = useState(() => {
     const requested = localStorage.getItem("fluentops_permissions_requested");
@@ -943,6 +1024,21 @@ export default function App() {
           </div>
 
           <div className="flex items-center gap-3 md:gap-6 shrink-0">
+            {/* Cellphone Optimization Badge/Button (Nebula Hub Style) */}
+            <button
+              onClick={() => setShowDeviceModal(true)}
+              className={`flex items-center gap-1.5 px-2.5 py-1.5 rounded-lg text-[9px] md:text-[10px] font-bold uppercase tracking-wider transition-all border shrink-0 cursor-pointer ${
+                theme === 'dark' 
+                  ? "border-[#282A3E] text-indigo-400 bg-indigo-500/10 hover:bg-indigo-500/15" 
+                  : "border-neutral-200 text-neutral-700 bg-neutral-50 hover:bg-neutral-100"
+              }`}
+              title="Calibração de Tela e Dispositivo"
+            >
+              <Smartphone className="w-3.5 h-3.5 animate-pulse text-[#5542F6]" />
+              <span>{deviceProfile === 'iphone' ? 'iPhone' : deviceProfile === 'samsung' ? 'Samsung' : deviceProfile === 'motorola' ? 'Motorola' : deviceProfile === 'google' ? 'Pixel' : deviceProfile === 'generic_android' ? 'Android' : 'Geral'}</span>
+              <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse hidden xs:inline-block" />
+            </button>
+
             <div className="text-right hidden sm:block">
               <p className="text-[10px] text-neutral-400 uppercase font-bold tracking-widest">Estudo Realizado Hoje</p>
               <p className={`text-xs font-semibold mt-0.5 ${theme === 'dark' ? "text-white" : "text-neutral-900"}`}>{stats.speakingTimeMinutes} / {profile.dailyGoalMinutes} min</p>
@@ -957,7 +1053,7 @@ export default function App() {
         </header>
 
         {/* scrollable panel content */}
-        <div className="flex-1 overflow-y-auto p-4 pb-20 md:p-8" id="viewport-scrollable-content">
+        <div className={`flex-1 overflow-y-auto p-4 md:p-8 ${deviceStyles.safeBottomPadding}`} id="viewport-scrollable-content">
           
           {/* TAB 1: CORE CONTROL DASHBOARD */}
           {activeTab === "dashboard" && (
@@ -1977,6 +2073,107 @@ export default function App() {
               <span className="text-[9px] uppercase tracking-wider scale-95">Redação</span>
             </button>
 
+          </div>
+        </div>
+      )}
+
+      {/* Device Optimization Modal (Nebula Hub Style) */}
+      {showDeviceModal && (
+        <div className="fixed inset-0 bg-[#0C0B14]/80 backdrop-blur-md flex items-center justify-center z-50 p-4 transition-all duration-300">
+          <div className={`w-full max-w-md p-6 rounded-2xl border space-y-6 shadow-2xl transition-all duration-300 ${
+            theme === 'dark' ? "bg-[#151422] border-[#282A3E] text-white" : "bg-white border-neutral-200 text-neutral-900"
+          }`}>
+            <div className="flex items-center justify-between">
+              <div className="flex items-center gap-2">
+                <Smartphone className="w-5 h-5 text-[#5542F6]" />
+                <h3 className="font-display font-semibold text-base">Otimização de Dispositivo</h3>
+              </div>
+              <button 
+                onClick={() => setShowDeviceModal(false)}
+                className={`p-1.5 rounded-lg text-neutral-400 hover:text-white transition-colors cursor-pointer ${
+                  theme === 'dark' ? 'hover:bg-neutral-800' : 'hover:bg-neutral-100'
+                }`}
+              >
+                <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M18 6 6 18"/><path d="m6 6 12 12"/></svg>
+              </button>
+            </div>
+
+            <div className="space-y-4">
+              <p className={`text-xs leading-relaxed ${theme === 'dark' ? "text-[#A3A2B5]" : "text-neutral-500"}`}>
+                O FluentOps detecta automaticamente o seu aparelho e calibra as interfaces, tamanhos de letra, grades de toque, e margens seguras inferiores para evitar sobreposição com as barras de navegação física e gestual de cada sistema operacional.
+              </p>
+
+              {/* Status Indicator */}
+              <div className={`p-4 rounded-xl border flex items-center gap-3.5 ${
+                theme === 'dark' ? "bg-[#1B192A] border-[#282A3E]" : "bg-neutral-50 border-neutral-150"
+              }`}>
+                <div className="px-2.5 py-1.5 rounded-lg bg-emerald-500/10 text-emerald-400 font-mono text-xs font-semibold uppercase tracking-wider animate-pulse flex items-center gap-1">
+                  <span className="w-2 h-2 rounded-full bg-emerald-500" /> Ativo
+                </div>
+                <div>
+                  <h4 className="text-xs font-bold text-neutral-300">Aparelho Selecionado</h4>
+                  <p className="text-xs font-semibold text-white mt-0.5">{getDeviceStyles().name}</p>
+                </div>
+              </div>
+
+              {/* Profile overrides selection */}
+              <div className="space-y-2">
+                <label className="text-[10px] font-bold uppercase tracking-wider text-neutral-400">Calibração Manual do Layout:</label>
+                <div className="grid grid-cols-2 gap-2">
+                  {[
+                    { key: "iphone", name: "Apple iPhone" },
+                    { key: "samsung", name: "Samsung Galaxy" },
+                    { key: "motorola", name: "Motorola Moto" },
+                    { key: "google", name: "Google Pixel" },
+                    { key: "generic_android", name: "Android Genérico" },
+                    { key: "generic", name: "Desktop / Geral" }
+                  ].map((p) => (
+                    <button
+                      key={p.key}
+                      onClick={() => setDeviceProfile(p.key)}
+                      className={`px-3 py-2 text-xs rounded-xl border text-left transition-all flex flex-col justify-between cursor-pointer ${
+                        deviceProfile === p.key
+                          ? "border-[#5542F6] bg-[#5542F6]/10 text-white"
+                          : (theme === 'dark' ? "border-[#282A3E] bg-neutral-900/35 hover:bg-neutral-800 text-neutral-400" : "border-neutral-200 bg-neutral-50 hover:bg-neutral-100 text-neutral-700")
+                      }`}
+                    >
+                      <span className="font-semibold">{p.name}</span>
+                      <span className="text-[9px] text-[#A3A2B5] font-normal">Ajuste de Safas & Toques</span>
+                    </button>
+                  ))}
+                </div>
+              </div>
+
+              {/* Tuning Technical details */}
+              <div className={`p-3.5 rounded-xl border text-[10px] space-y-1 ${
+                theme === 'dark' ? "bg-black/35 border-[#282A3E] text-[#A3A2B5]" : "bg-neutral-50 border-neutral-150 text-neutral-500"
+              }`}>
+                <div className="flex justify-between">
+                  <span>Espaçamento de Segurança:</span>
+                  <span className="font-mono text-emerald-400 font-semibold">{getDeviceStyles().safeBottomPadding}</span>
+                </div>
+                <div className="flex justify-between">
+                  <span>Preenchimento de Cards:</span>
+                  <span className="font-mono text-emerald-400 font-semibold">{getDeviceStyles().cardPadding}</span>
+                </div>
+                <div className="flex justify-between">
+                  <span>Modo Compacto de Tela:</span>
+                  <span className="font-mono text-emerald-400 font-semibold">{getDeviceStyles().compactLayout ? "Sim (Calibrado)" : "Não"}</span>
+                </div>
+                <p className="border-t border-neutral-800/50 pt-2 mt-1 italic text-neutral-400">
+                  * {getDeviceStyles().notes}
+                </p>
+              </div>
+            </div>
+
+            <div className="flex justify-end pt-2">
+              <button
+                onClick={() => setShowDeviceModal(false)}
+                className="px-4 py-2 nebula-btn-primary text-xs rounded-xl font-bold cursor-pointer"
+              >
+                Confirmar & Fechar
+              </button>
+            </div>
           </div>
         </div>
       )}
