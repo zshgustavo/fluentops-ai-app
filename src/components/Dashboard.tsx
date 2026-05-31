@@ -80,7 +80,7 @@ export default function Dashboard({
       {/* Welcome Board */}
       <div className={`flex flex-col md:flex-row justify-between items-start md:items-center gap-4 p-6 rounded-2xl border transition-all duration-300 ${
         isDark 
-          ? "bg-[#161a24] border-[#242936] shadow-2xl" 
+          ? "bg-[#151422] border-[#282A3E] shadow-2xl" 
           : "bg-white border-neutral-100 shadow-xs"
       }`}>
         <div>
@@ -134,7 +134,7 @@ export default function Dashboard({
       <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
         {/* 1. Frase Executiva do Dia */}
         <div className={`p-5 rounded-2xl border flex flex-col gap-3 transition-all duration-300 relative overflow-hidden ${
-          isDark ? "bg-[#161a24] border-indigo-900/30" : "bg-white border-indigo-100"
+          isDark ? "bg-[#151422] border-[#282A3E]" : "bg-white border-indigo-100"
         }`}>
           <div className={`absolute -right-4 -top-4 w-16 h-16 rounded-full blur-2xl ${
             isDark ? "bg-indigo-600/10" : "bg-indigo-600/5"
@@ -156,7 +156,7 @@ export default function Dashboard({
 
         {/* 2. Próximo Passo Recomendado (Baseado em IA) */}
         <div className={`p-5 rounded-2xl border flex flex-col gap-3 transition-all duration-300 relative overflow-hidden ${
-          isDark ? "bg-[#161a24] border-rose-900/30" : "bg-white border-rose-100"
+          isDark ? "bg-[#151422] border-[#282A3E]" : "bg-white border-rose-100"
         }`}>
           <div className={`absolute -right-4 -top-4 w-16 h-16 rounded-full blur-2xl ${
             isDark ? "bg-rose-600/10" : "bg-rose-600/5"
@@ -183,7 +183,7 @@ export default function Dashboard({
 
         {/* 3. Acesso Rápido - Simulação Rápida */}
         <div className={`p-5 rounded-2xl border flex flex-col gap-3 transition-all duration-300 relative overflow-hidden ${
-          isDark ? "bg-gradient-to-br from-[#161a24] to-blue-900/10 border-blue-900/30 hover:border-blue-500/50" : "bg-gradient-to-br from-white to-blue-50 border-blue-100 hover:border-blue-300"
+          isDark ? "bg-gradient-to-br from-[#151422] to-indigo-900/20 border-[#282A3E] hover:border-[#5542F6]/50" : "bg-gradient-to-br from-white to-blue-50 border-blue-100 hover:border-blue-300"
         } cursor-pointer group`} onClick={() => setActiveTab("lessons")}>
           <div className="flex items-center justify-between">
             <h3 className="text-[10px] font-bold uppercase tracking-wider text-blue-500 mb-1 flex items-center gap-1.5">
@@ -205,7 +205,7 @@ export default function Dashboard({
       <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
         {/* Streak */}
         <div className={`p-5 rounded-2xl border flex items-center gap-4 transition-all duration-300 ${
-          isDark ? "bg-[#161a24] border-[#242936]" : "bg-white border-neutral-100"
+          isDark ? "bg-[#151422] border-[#282A3E]" : "bg-white border-neutral-100"
         }`} id="stat-card-streak">
           <div className={`p-3.5 rounded-xl ${
             isDark ? "bg-amber-500/10 text-amber-400 border border-amber-500/20" : "bg-amber-50 text-amber-600"
@@ -222,7 +222,7 @@ export default function Dashboard({
 
         {/* Lessons Completed */}
         <div className={`p-5 rounded-2xl border flex items-center gap-4 transition-all duration-300 ${
-          isDark ? "bg-[#161a24] border-[#242936]" : "bg-white border-neutral-100"
+          isDark ? "bg-[#151422] border-[#282A3E]" : "bg-white border-neutral-100"
         }`} id="stat-card-lessons">
           <div className={`p-3.5 rounded-xl ${
             isDark ? "bg-blue-500/10 text-blue-400 border border-blue-500/20" : "bg-blue-50 text-blue-600"
@@ -239,7 +239,7 @@ export default function Dashboard({
 
         {/* Focus Practice Time */}
         <div className={`p-5 rounded-2xl border flex items-center gap-4 transition-all duration-300 ${
-          isDark ? "bg-[#161a24] border-[#242936]" : "bg-white border-neutral-100"
+          isDark ? "bg-[#151422] border-[#282A3E]" : "bg-white border-neutral-100"
         }`} id="stat-card-time">
           <div className={`p-3.5 rounded-xl ${
             isDark ? "bg-green-500/10 text-green-400 border border-green-500/20" : "bg-green-50 text-green-600"
@@ -256,7 +256,7 @@ export default function Dashboard({
 
         {/* Vocabulary Vault */}
         <div className={`p-5 rounded-2xl border flex items-center gap-4 transition-all duration-300 ${
-          isDark ? "bg-[#161a24] border-[#242936]" : "bg-white border-neutral-100"
+          isDark ? "bg-[#151422] border-[#282A3E]" : "bg-white border-neutral-100"
         }`} id="stat-card-vocab">
           <div className={`p-3.5 rounded-xl ${
             isDark ? "bg-purple-500/10 text-purple-400 border border-purple-500/20" : "bg-purple-50 text-purple-600"
@@ -275,9 +275,9 @@ export default function Dashboard({
       {/* Sub-skills Metrics Analysis */}
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
         
-        {/* Auditoria Vocal e Estilo */}
+        {/* Auditoria Vocal & Estilo */}
         <div className={`p-6 rounded-2xl border space-y-5 transition-all duration-300 ${
-          isDark ? "bg-[#161a24] border-[#242936]" : "bg-white border-neutral-100"
+          isDark ? "bg-[#151422] border-[#282A3E]" : "bg-white border-neutral-100"
         }`}>
           <h3 className="text-[10px] font-bold uppercase tracking-wider text-neutral-400 mb-2 flex items-center gap-2">
             <BarChart3 className="w-4 h-4 text-neutral-400" />
@@ -344,7 +344,7 @@ export default function Dashboard({
 
           <div className={`p-3.5 rounded-xl text-xs leading-relaxed border mt-4 ${
             isDark 
-              ? "bg-[#0e1117] border-[#242936] text-neutral-400" 
+              ? "bg-[#1B192A] border-[#282A3E] text-neutral-400" 
               : "bg-neutral-50 border-neutral-100 text-neutral-500"
           }`}>
             <strong>Conselho Estratégico:</strong> Sua diplomacia escrita está excelente. Para reuniões virtuais, tente reduzir palavras de hesitação ('like', 'sort of') para projetar maior autoridade executiva.
@@ -353,7 +353,7 @@ export default function Dashboard({
 
         {/* Gráfico de Evolução SVG */}
         <div className={`p-6 rounded-2xl border flex flex-col justify-between transition-all duration-300 ${
-          isDark ? "bg-[#161a24] border-[#242936]" : "bg-white border-neutral-100"
+          isDark ? "bg-[#151422] border-[#282A3E]" : "bg-white border-neutral-100"
         }`}>
           <div className="flex justify-between items-start mb-4">
             <div>
@@ -394,7 +394,7 @@ export default function Dashboard({
                       y1={y}
                       x2={width - padding}
                       y2={y}
-                      className={isDark ? "stroke-[#242936] stroke-1" : "stroke-neutral-100 stroke-1"}
+                      className={isDark ? "stroke-[#282A3E] stroke-1" : "stroke-neutral-100 stroke-1"}
                       strokeDasharray="4,4"
                     />
                     <text
@@ -463,7 +463,7 @@ export default function Dashboard({
                 const coordsDip = getCoordinates(trend[len].diplomacy, len).split(",");
                 const coordsGram = getCoordinates(trend[len].grammar, len).split(",");
 
-                const strokeColor = isDark ? "#161a24" : "#ffffff";
+                const strokeColor = isDark ? "#151422" : "#ffffff";
 
                 return (
                   <g>
@@ -490,7 +490,7 @@ export default function Dashboard({
 
       {/* Histórico/Journal de Práticas */}
       <div className={`p-6 rounded-2xl border transition-all duration-300 ${
-        isDark ? "bg-[#161a24] border-[#242936]" : "bg-white border-neutral-100"
+        isDark ? "bg-[#151422] border-[#282A3E]" : "bg-white border-neutral-100"
       }`}>
         <h3 className="text-[10px] font-bold uppercase tracking-wider text-neutral-400 mb-4">
           Histórico de Práticas Realizadas ({completedLessons.length})
@@ -512,7 +512,7 @@ export default function Dashboard({
                   <div>
                     <span className={`font-semibold ${isDark ? "text-neutral-200" : "text-neutral-800"}`}>{lesson.title}</span>
                     <span className={`text-[9px] px-1.5 py-0.5 rounded ml-2 font-mono uppercase tracking-wider ${
-                      isDark ? "bg-[#0e1117] text-neutral-400" : "bg-neutral-100 text-neutral-500"
+                      isDark ? "bg-[#1B192A] text-neutral-400" : "bg-neutral-100 text-neutral-500"
                     }`}>
                       {lesson.type === "videocall" ? "Conversação" :
                        lesson.type === "speaking" ? "Pronúncia" :

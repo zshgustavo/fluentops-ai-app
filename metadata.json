@@ -1,6 +1,6 @@
 {
   "name": "FluentOps",
   "description": "Somos o inglês que roda em produção. Deploy your english.",
-  "requestFramePermissions": ["microphone"],
+  "requestFramePermissions": ["microphone", "camera"],
   "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
 }

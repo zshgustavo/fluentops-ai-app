@@ -16,11 +16,11 @@
   background: transparent;
 }
 ::-webkit-scrollbar-thumb {
-  background: rgba(156, 163, 175, 0.3);
+  background: rgba(85, 66, 246, 0.2);
   border-radius: 9999px;
 }
 ::-webkit-scrollbar-thumb:hover {
-  background: rgba(156, 163, 175, 0.5);
+  background: rgba(85, 66, 246, 0.4);
 }
 
 body {
@@ -28,6 +28,59 @@ body {
   background-color: #fafafa;
   color: #1a1a1a;
   overflow-x: hidden;
+}
+
+/* Nebula Hub Theme Classes */
+.nebula-bg-grid {
+  background-image: 
+    linear-gradient(rgba(85, 66, 246, 0.05) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(85, 66, 246, 0.05) 1px, transparent 1px);
+  background-size: 40px 40px;
+}
+
+.nebula-glow-purple {
+  position: relative;
+}
+.nebula-glow-purple::before {
+  content: '';
+  position: absolute;
+  top: -10%;
+  left: -10%;
+  width: 120%;
+  height: 120%;
+  background: radial-gradient(circle, rgba(85, 66, 246, 0.12) 0%, transparent 60%);
+  z-index: 0;
+  pointer-events: none;
+}
+
+.nebula-card {
+  background-color: #151422;
+  border: 1px solid #282A3E;
+  border-radius: 16px;
+  transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+}
+.nebula-card:hover {
+  border-color: #373550;
+  box-shadow: 0 0 25px rgba(85, 66, 246, 0.15);
+  transform: translateY(-2px);
+}
+
+.nebula-gradient-text {
+  background: linear-gradient(135deg, #ffffff 0%, #D8D4FF 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+}
+
+.nebula-btn-primary {
+  background: linear-gradient(135deg, #5542F6 0%, #6875F5 100%);
+  color: white;
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  box-shadow: 0 4px 14px rgba(85, 66, 246, 0.35);
+  transition: all 0.2s ease-in-out;
+}
+.nebula-btn-primary:hover {
+  transform: scale(1.02);
+  box-shadow: 0 6px 20px rgba(85, 66, 246, 0.5);
 }
 
 /* High contrast glass card overlays */

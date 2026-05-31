@@ -55,6 +55,24 @@ export default function App() {
   const [isServerHealthy, setIsServerHealthy] = useState(true);
   const [isSidebarCollapsed, setIsSidebarCollapsed] = useState(() => window.innerWidth < 768);
 
+  const [showPermissionPrompt, setShowPermissionPrompt] = useState(() => {
+    const requested = localStorage.getItem("fluentops_permissions_requested");
+    return requested !== "granted" && requested !== "dismissed";
+  });
+
+  const requestMediaPermissions = async () => {
+    try {
+      const stream = await navigator.mediaDevices.getUserMedia({ audio: true, video: true });
+      stream.getTracks().forEach(track => track.stop());
+      localStorage.setItem("fluentops_permissions_requested", "granted");
+      setShowPermissionPrompt(false);
+    } catch (err) {
+      console.warn("Permissões de mídia negadas/canceladas: ", err);
+      localStorage.setItem("fluentops_permissions_requested", "dismissed");
+      setShowPermissionPrompt(false);
+    }
+  };
+
   useEffect(() => {
     const handleResize = () => {
       if (window.innerWidth < 768) {
@@ -717,11 +735,19 @@ export default function App() {
   }
 
   return (
-    <div className={`flex h-screen w-full overflow-hidden font-sans transition-colors duration-300 ${theme === 'dark' ? "bg-[#0f111a] text-[#f1f5f9]" : "bg-[#fcfcfc] text-neutral-900"}`}>
+    <div className={`flex h-screen w-full overflow-hidden font-sans transition-colors duration-300 ${theme === 'dark' ? "bg-[#0C0B14] text-[#f1f5f9] nebula-bg-grid" : "bg-[#fcfcfc] text-neutral-900"}`}>
       
+      {/* Ambient background glow dots (Nebula Hub Style) */}
+      {theme === 'dark' && (
+        <>
+          <div className="absolute top-[-10%] left-[-10%] w-[50%] h-[50%] bg-[#5542F6]/5 rounded-full blur-[120px] pointer-events-none z-0" />
+          <div className="absolute bottom-[-10%] right-[-10%] w-[50%] h-[50%] bg-indigo-500/5 rounded-full blur-[120px] pointer-events-none z-0" />
+        </>
+      )}
+
       {/* minimalist navigation sidebar - fluentops style focus */}
       {!isImmersiveMode && (
-      <aside className={`h-full flex flex-col pt-6 pb-6 shrink-0 shadow-xs border-r transition-all duration-300 ${isSidebarCollapsed ? "w-20 px-2 items-center" : "w-64 px-6"} ${theme === 'dark' ? "bg-[#161a24] border-[#242936]" : "bg-white border-neutral-200"}`} id="nav-sidebar">
+      <aside className={`h-full flex flex-col pt-6 pb-6 shrink-0 shadow-xs border-r transition-all duration-300 z-10 ${isSidebarCollapsed ? "w-20 px-2 items-center" : "w-64 px-6"} ${theme === 'dark' ? "bg-[#151422] border-[#282A3E]" : "bg-white border-neutral-200"}`} id="nav-sidebar">
         
         {/* elegant logo branding component */}
         <div className={`flex items-center mb-10 ${isSidebarCollapsed ? "flex-col gap-4 w-full" : "gap-3 w-full"}`}>
@@ -895,7 +921,7 @@ export default function App() {
       <main className="flex-1 flex flex-col h-full overflow-hidden w-full">
         
         {/* minimalist clean header panel */}
-        <header className={`h-16 border-b px-4 md:px-8 flex items-center justify-between shrink-0 transition-colors duration-300 ${theme === 'dark' ? "bg-[#161a25] border-[#242936]" : "bg-white border-neutral-200"}`}>
+        <header className={`h-16 border-b px-4 md:px-8 flex items-center justify-between shrink-0 transition-colors duration-300 z-10 ${theme === 'dark' ? "bg-[#151422] border-[#282A3E]" : "bg-white border-neutral-200"}`}>
           <div className="flex items-center gap-3 md:gap-4 overflow-hidden mr-4">
             <h2 className="text-[10px] md:text-[11px] font-bold text-neutral-400 uppercase tracking-widest animate-fade-in truncate">
               <span className="hidden sm:inline">Espaço Executivo / </span>{activeTab === "dashboard" ? "Visualização Geral" : activeTab === "lessons" ? "Planejamento Lírico" : activeTab === "calls" ? "Videochamada Simulada" : "Redação Analítica"}
@@ -906,7 +932,7 @@ export default function App() {
                 className={`flex items-center shrink-0 gap-1.5 px-2.5 py-1.5 rounded-md text-[10px] font-bold uppercase tracking-wider transition-colors border ${
                   isImmersiveMode 
                     ? "bg-blue-600/10 border-blue-500/30 text-blue-500 hover:bg-blue-600/20" 
-                    : (theme === "dark" ? "bg-[#242936] border-transparent text-neutral-300 hover:bg-[#2a3040]" : "bg-neutral-100 border-transparent text-neutral-600 hover:bg-neutral-200")
+                    : (theme === "dark" ? "bg-[#1B192A] border-[#282A3E] text-neutral-300 hover:bg-[#282A3E]" : "bg-neutral-100 border-transparent text-neutral-600 hover:bg-neutral-200")
                 }`}
                 title="Alternar Modo Imersivo"
               >
@@ -921,9 +947,9 @@ export default function App() {
               <p className="text-[10px] text-neutral-400 uppercase font-bold tracking-widest">Estudo Realizado Hoje</p>
               <p className={`text-xs font-semibold mt-0.5 ${theme === 'dark' ? "text-white" : "text-neutral-900"}`}>{stats.speakingTimeMinutes} / {profile.dailyGoalMinutes} min</p>
             </div>
-            <div className={`w-16 md:w-32 h-1.5 rounded-full overflow-hidden ${theme === 'dark' ? "bg-[#1d2230]" : "bg-neutral-100"}`} title={`${stats.speakingTimeMinutes}/${profile.dailyGoalMinutes} min`}>
+            <div className={`w-16 md:w-32 h-1.5 rounded-full overflow-hidden ${theme === 'dark' ? "bg-[#1B192A]" : "bg-neutral-100"}`} title={`${stats.speakingTimeMinutes}/${profile.dailyGoalMinutes} min`}>
               <div 
-                className={`h-full transition-all duration-300 ${theme === 'dark' ? "bg-white" : "bg-neutral-950"}`}
+                className={`h-full transition-all duration-300 ${theme === 'dark' ? "bg-[#5542F6]" : "bg-neutral-950"}`}
                 style={{ width: `${Math.min(100, (stats.speakingTimeMinutes / profile.dailyGoalMinutes) * 100)}%` }}
               />
             </div>
@@ -1808,7 +1834,7 @@ export default function App() {
       {/* Break Reminder Overlay */}
       {showBreakReminder && (
         <div className="fixed bottom-6 right-6 z-50 animate-in slide-in-from-bottom-5 fade-in duration-300">
-          <div className={`p-4 rounded-xl shadow-lg border flex items-start gap-4 max-w-sm ${theme === 'dark' ? "bg-[#161a24] border-[#242936] text-white" : "bg-white border-neutral-200 text-neutral-900"}`}>
+          <div className={`p-4 rounded-xl shadow-lg border flex items-start gap-4 max-w-sm ${theme === 'dark' ? "bg-[#151422] border-[#282A3E] text-white" : "bg-white border-neutral-200 text-neutral-900"}`}>
             <div className={`p-2 rounded-full mt-1 shrink-0 ${theme === 'dark' ? "bg-amber-500/10 text-amber-500" : "bg-amber-100 text-amber-600"}`}>
               <Clock className="w-5 h-5" />
             </div>
@@ -1828,6 +1854,40 @@ export default function App() {
             >
               <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M18 6 6 18"/><path d="m6 6 12 12"/></svg>
             </button>
+          </div>
+        </div>
+      )}
+
+      {/* Modern Microphone and Camera Permission Overlay (Nebula Hub Style) */}
+      {showPermissionPrompt && (
+        <div className="fixed inset-0 bg-[#0C0B14]/80 backdrop-blur-md flex items-center justify-center z-50 p-4 transition-all duration-300">
+          <div className="w-full max-w-md p-6 bg-[#151422] border border-[#282A3E] rounded-2xl text-center space-y-6 shadow-2xl scale-100 transition-all duration-500">
+            <div className="w-14 h-14 bg-[#5542F6]/15 hover:bg-[#5542F6]/25 text-[#5542F6] border border-[#5542F6]/30 rounded-full flex items-center justify-center mx-auto">
+              <Mic className="w-6 h-6 animate-pulse" />
+            </div>
+            <div className="space-y-2">
+              <h3 className="text-lg font-display font-semibold text-white">Privacidade e Ativação</h3>
+              <p className="text-xs text-[#A3A2B5] leading-relaxed">
+                Para praticar sua pronúncia de forma imersiva e simular videochamadas corporativas em tempo real com nossa inteligência artificial, o FluentOps solicita autorização para utilizar o microfone e a câmera de seu dispositivo.
+              </p>
+            </div>
+            <div className="flex gap-3 justify-center">
+              <button
+                onClick={() => {
+                  localStorage.setItem("fluentops_permissions_requested", "dismissed");
+                  setShowPermissionPrompt(false);
+                }}
+                className="px-4 py-2 border border-[#282A3E] text-xs font-semibold rounded-xl text-[#A3A2B5] hover:bg-[#1B192A] hover:text-white transition-colors cursor-pointer"
+              >
+                Agora Não
+              </button>
+              <button
+                onClick={requestMediaPermissions}
+                className="px-5 py-2 nebula-btn-primary rounded-xl text-xs font-semibold cursor-pointer"
+              >
+                Conceder Permissão
+              </button>
+            </div>
           </div>
         </div>
       )}
