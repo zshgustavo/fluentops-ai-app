@@ -171,7 +171,7 @@ Evaluate:
         responseMimeType: "application/json",
         responseSchema: {
           type: Type.OBJECT,
-          required: ["pronunciationScore", "pronunciationIssues", "grammarFeedback", "toneAnalysis", "overallScore", "coachingInsight"],
+          required: ["pronunScore", "pronunciationIssues", "grammarFeedback", "toneAnalysis", "overallScore", "coachingInsight"],
           properties: {
             overallScore: { type: Type.INTEGER, description: "Composite level 0 to 100" },
             pronunScore: { type: Type.INTEGER, description: "Phonetic matching rate 0 to 100" },
